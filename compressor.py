@@ -1,21 +1,24 @@
 import math
 def compress(ifile, codes, ofile):
     symbol_codes = {}
-    with open(codes, 'r') as f:
+    with open(codes, 'r', encoding='utf-8') as f:
         for line in f:
             last_space_index = line.rfind(' ')
             if last_space_index != -1:
                 symbol = line[:last_space_index]
-                code = line[last_space_index + 1:].strip()
+                code = line[last_space_index + 1:]
                 symbol_codes[symbol] = code
-    with open(ifile, 'r') as f:
-        itext = f.read().strip()
+            print(symbol)
+    with open(ifile, 'r', encoding='utf-8') as f:
+        itext = f.read()
     compressed = ''
     for c in itext:
+        if c == '\n':
+            compressed += symbol_codes['n']
         if c.isalpha() :
             c=c.upper()
-            if c in symbol_codes:
-                compressed += symbol_codes[c]
+        if c in symbol_codes:
+            compressed += symbol_codes[c]
     compressed_bytes = compress_bits(compressed)
     with open(ofile, 'wb') as f:
         f.write(compressed_bytes)
@@ -45,13 +48,16 @@ def compress_bits(compressed):
     current_byte = 0
     bit_count = 0
     for bit in compressed:
-        current_byte <<= 1
-        current_byte |= int(bit)
-        bit_count += 1
-        if bit_count == 8:
-            compressed_bytes.append(current_byte)
-            current_byte = 0
-            bit_count = 0
+        if bit == '0' or bit == '1':
+            current_byte <<= 1
+            current_byte |= int(bit)
+            bit_count += 1
+            if bit_count == 8:
+                compressed_bytes.append(current_byte)
+                current_byte = 0
+                bit_count = 0
+        elif bit == 'N':  
+            continue
     if bit_count > 0:
         current_byte <<= (8 - bit_count)
         compressed_bytes.append(current_byte)

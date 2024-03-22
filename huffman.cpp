@@ -31,15 +31,20 @@ void printCodes(Node *root, string str, unordered_map<char, string> &huffmanCode
 }
 unordered_map<char, string> generateHuffmanCodes(istream &input) {
     unordered_map<char, unsigned> freq;
-    string line;
-    while (getline(input, line)) {
-        for (char c : line) {
-            if (isalpha(c) || isspace(c)) {
+    char c;
+    while (input.get(c)) {
+        if (c >= 0 && c <= 127) {
+            if(c=='\n'){
+                freq['n']++;
+            }
+            else if(isalpha(c)){
                 freq[toupper(c)]++;
+            }
+            else{
+                freq[c]++;
             }
         }
     }
-
     priority_queue<Node *, vector<Node *>, comp> pq;
     for (const auto &pair : freq) {
         pq.push(new Node(pair.first, pair.second));
